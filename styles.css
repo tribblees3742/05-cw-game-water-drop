@@ -29,6 +29,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 12px;
     background-color: #f0f0f0;
     font-family: Arial, sans-serif;
 }
@@ -37,14 +38,17 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
+    width: min(100%, 860px);
 }
 
 .score-panel {
     display: flex;
-    justify-content: space-between;  /* Space between score and button */
+    justify-content: space-between;
     align-items: center;
-    width: 800px;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: min(800px, 100%);
     padding: 10px;
     background-color: #fff;
     border-radius: 8px;
@@ -58,8 +62,9 @@ body {
 }
 
 #game-container {
-    width: 800px;
-    height: 600px;
+    width: min(800px, 100%);
+    aspect-ratio: 4 / 3;
+    max-height: 70vh;
     background-color: #e6f7ff;
     border: 2px solid #333;
     border-radius: 8px;
@@ -68,18 +73,47 @@ body {
 }
 
 
-#start-btn {
-    padding: 8px 16px;
-    background-color: #4CAF50;
+#start-btn,
+#reset-btn,
+#challenge-btn {
+    padding: 10px 14px;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    touch-action: manipulation;
+}
+
+#start-btn {
+    background-color: #4CAF50;
 }
 
 #start-btn:hover {
     background-color: #45a049;
+}
+
+#reset-btn {
+    background-color: #777;
+    margin-left: 8px;
+}
+
+#reset-btn:hover { background-color: #666; }
+
+#challenge-btn {
+    background-color: #2E9DF7;
+    margin-left: 8px;
+}
+
+#challenge-btn:hover { background-color: #ff7a00; }
+
+#challenge-banner {
+    background: #fff7e6;
+    color: #b85b00;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-weight: bold;
 }
 
 .score {
@@ -90,16 +124,17 @@ body {
 
 .water-drop {
     position: absolute;
-    width: 60px;  /* increased from 40px */
-    height: 60px; /* increased from 40px */
+    width: 60px;
+    height: 60px;
     background-color: #0099ff;
     border-radius: 50%;
     animation: dropFall linear forwards;
     transform-origin: center;
     cursor: pointer;
-    padding: 15px;  /* Add padding for larger click area */
-    margin: -15px;  /* Offset padding to maintain visual size */
-    transition: transform 0.1s ease;  /* Smooth hover effect */
+    padding: 15px;
+    margin: -15px;
+    transition: transform 0.1s ease;
+    touch-action: manipulation;
 }
 
 .water-drop:hover {
@@ -110,12 +145,42 @@ body {
     background-color: #ff4444;
 }
 
+/* Polluted drop: looks murky with a brown/green tone and speckles */
+.water-drop.polluted {
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08) 0 8%, transparent 9%),
+                linear-gradient(180deg, #8a5a2b 0%, #5f7a3a 100%);
+    box-shadow: inset 0 -6px 10px rgba(0,0,0,0.35);
+    border: 2px solid rgba(0,0,0,0.15);
+}
+
+.water-drop.polluted::after {
+    content: '';
+    position: absolute;
+    left: 10%;
+    top: 10%;
+    width: 8px;
+    height: 8px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 50%;
+    box-shadow: 18px 6px rgba(0,0,0,0.18), 34px 18px rgba(0,0,0,0.12);
+    opacity: 0.9;
+}
+
 .game-title {
     color: #131313;
     font-size: 48px;
     margin-top: 0;
     margin-bottom: 5px;  /* reduced from 20px */
     text-align: center;
+}
+
+/* Logo at the top of the game wrapper */
+.game-logo {
+    display: block;
+    max-width: 240px;
+    width: 35%;
+    height: auto;
+    margin-bottom: 6px;
 }
 
 .game-tagline {
@@ -130,16 +195,116 @@ body {
         transform: translateY(-20px);
     }
     to {
-        transform: translateY(600px);
+        transform: translateY(var(--drop-distance, 600px));
     }
 }
 
 @media (max-width: 850px) {
-    .game-wrapper, .score-panel, #game-container {
-        width: 95vw;
+    .game-wrapper {
+        width: 100%;
     }
-    
+
+    .score-panel {
+        width: 100%;
+    }
+
     #game-container {
-        height: 70vh;
+        width: 100%;
+        max-height: 65vh;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 8px;
+        align-items: flex-start;
+    }
+
+    .game-wrapper {
+        gap: 12px;
+    }
+
+    .score-panel {
+        justify-content: center;
+        padding: 8px;
+    }
+
+    .score,
+    .timer {
+        font-size: 18px;
+        width: 100%;
+        text-align: center;
+    }
+
+    #start-btn,
+    #reset-btn,
+    #challenge-btn {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .game-title {
+        font-size: 36px;
+    }
+
+    .game-tagline {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .game-logo {
+        max-width: 180px;
+    }
+}
+
+/* Celebration overlay */
+#celebration-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.4);
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.celebration-card {
+    background: white;
+    padding: 24px 32px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+#celebration-overlay h2 {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+#celebration-overlay p { margin-bottom: 12px; font-size: 18px; }
+
+#play-again {
+    padding: 8px 14px;
+    background: #2E9DF7;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.confetti {
+    position: absolute;
+    top: -20px;
+    width: 10px;
+    height: 18px;
+    opacity: 0.95;
+    animation: confetti-fall 2500ms linear forwards;
+}
+
+@keyframes confetti-fall {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0.9;
     }
 }
